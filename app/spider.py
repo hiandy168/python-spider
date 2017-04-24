@@ -1,14 +1,42 @@
 import urllib.request
 from lxml import etree
+import os
 
-response = urllib.request.urlopen("http://www.mianfeiwendang.com/doc/083531eb169db5935bd01c1f/3")
+def getPages():
+    baseUrl = 'http://www.mianfeiwendang.com/doc/083531eb169db5935bd01c1f/%d'
 
-html = response.read()
-html = etree.HTML(html)
-result = html.xpath('//p[@class="img"]/img/@src')
+    urls = []
 
-print(result)
+    for i in range(25):
+        urls.append(baseUrl % (i + 1))
 
+    # print(urls)
+    return urls
 
-# with open('cat_200_300.jpg','wb') as f:
-#     f.write(cat_img)
+def getPicLink(url):
+    response = urllib.request.urlopen(url)
+
+    html = response.read()
+    html = etree.HTML(html)
+    link = html.xpath('//p[@class="img"]/img/@src')
+
+    return link
+
+def downLoadPic(src):
+    baseUrl = 'http://www.mianfeiwendang.com%s'
+    
+    src = baseUrl % src[0]
+    # print(src)
+    index = src.split('-')[0].split('/')[-1] + '.jpg'
+    print(index)
+    req = urllib.request.Request(src)
+    response = urllib.request.urlopen(req)
+    content = response.read()
+
+    with open(index,'wb') as f:
+        f.write(content)
+        f.close()
+
+if __name__ == '__main__':
+    for link in getPages():
+        downLoadPic(getPicLink(link))
